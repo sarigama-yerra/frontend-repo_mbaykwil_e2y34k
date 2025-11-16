@@ -1,28 +1,49 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Navbar from './components/Navbar'
+import Hero from './components/Hero'
+import Marquee from './components/Marquee'
+import { Services, Projects, Testimonials, Contact } from './components/Sections'
 
-function App() {
-  const [count, setCount] = useState(0)
+const API_BASE = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8000'
+
+export default function App() {
+  const [services, setServices] = useState([])
+  const [projects, setProjects] = useState([])
+  const [testimonials, setTestimonials] = useState([])
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [s, p, t] = await Promise.all([
+          fetch(`${API_BASE}/api/services`).then(r=>r.json()).catch(()=>[]),
+          fetch(`${API_BASE}/api/projects`).then(r=>r.json()).catch(()=>[]),
+          fetch(`${API_BASE}/api/testimonials`).then(r=>r.json()).catch(()=>[]),
+        ])
+        setServices(s)
+        setProjects(p)
+        setTestimonials(t)
+      } catch {}
+    }
+    load()
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg">
-        <h1 className="text-3xl font-bold text-gray-800 mb-4">
-          Vibe Coding Platform
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Your AI-powered development environment
-        </p>
-        <div className="text-center">
-          <button
-            onClick={() => setCount(count + 1)}
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-          >
-            Count is {count}
-          </button>
+    <div className="min-h-screen bg-black text-white">
+      <Navbar />
+      <Hero />
+
+      <div className="bg-black">
+        <div className="mx-auto max-w-7xl px-6">
+          <Marquee items={["Performance Marketing", "Brand Strategy", "Web Experiences", "Video Production", "Content", "SEO", "Paid Social", "Automation"]} />
         </div>
       </div>
+
+      <Services services={services} />
+      <Projects projects={projects} />
+      <Testimonials testimonials={testimonials} />
+      <Contact />
+
+      <footer className="py-10 text-center text-white/50 border-t border-white/10">© {new Date().getFullYear()} ServiceMedia+. All rights reserved.</footer>
     </div>
   )
 }
-
-export default App
